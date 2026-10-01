@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=soft-tempest
+Comment=Full-screen per-frame noise overlay (soft-TEMPEST display masking)
+Exec=soft-tempest
+Terminal=false
+NoDisplay=true
+Categories=System;Security;
+OnlyShowIn=sway;Hyprland;river;wayfire;KDE;
+X-GNOME-Autostart-enabled=true

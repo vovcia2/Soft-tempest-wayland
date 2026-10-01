@@ -1,0 +1,17 @@
+[Unit]
+Description=soft-tempest noise overlay (soft-TEMPEST display masking)
+Documentation=https://github.com/vovcia2/Soft-tempest-wayland
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=soft-tempest
+Restart=on-failure
+RestartSec=2
+# Exit code 2 means "no wlr-layer-shell on this compositor"; do not loop on it.
+RestartPreventExitStatus=2
+
+[Install]
+WantedBy=graphical-session.target

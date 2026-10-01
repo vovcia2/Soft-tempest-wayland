@@ -1,0 +1,48 @@
+name: Build (Linux/Wayland)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwayland-dev wayland-protocols \
+            libegl1-mesa-dev libgles2-mesa-dev \
+            meson ninja-build pkg-config
+
+      - name: Configure
+        run: meson setup build --buildtype=release --werror
+
+      - name: Build
+        run: meson compile -C build
+
+      # The runner has no Wayland compositor, so only the parts that do not
+      # need one are exercised: option parsing and the "no display" path.
+      - name: Smoke test
+        run: |
+          ./build/soft-tempest --version
+          ./build/soft-tempest --help >/dev/null
+          set +e
+          env -u WAYLAND_DISPLAY -u DISPLAY XDG_RUNTIME_DIR=/nonexistent \
+            ./build/soft-tempest --no-config --verbose
+          rc=$?
+          set -e
+          echo "exit code without a compositor: $rc"
+          test "$rc" -eq 1
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: soft-tempest-linux
+          path: build/soft-tempest
+          if-no-files-found: error
